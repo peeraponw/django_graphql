@@ -6,7 +6,7 @@ from graphql_auth import mutations
 class AuthMutation(graphene.ObjectType):
     create_user = mutations.Register.Field()
     verify_account = mutations.VerifyAccount.Field()
-    token_auth = mutations.ObtainJSONWebToken.Field()
+    obtain_token = mutations.ObtainJSONWebToken.Field()
     update_account = mutations.UpdateAccount.Field()
     # clock_in = 
     # clock_out = 
