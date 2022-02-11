@@ -1,3 +1,4 @@
+from atexit import register
 import graphene
 from graphql_auth.schema import UserQuery, MeQuery
 from graphql_auth import mutations
@@ -11,6 +12,8 @@ class AuthMutation(graphene.ObjectType):
     # clock_out = 
 
 class Query(UserQuery, MeQuery, graphene.ObjectType):
+    
+    
     # current_clock = 
     # clocked_hours = 
     # today = 
