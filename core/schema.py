@@ -5,12 +5,15 @@ from django.contrib.auth import get_user_model
 from users.schema import UserType
 from users.schema import CreateUser
 
+from timeclock.models import Clock
 from timeclock.schema import ClockType, ClockedHoursType
 from timeclock.schema import ClockIn, ClockOut
 
 class Query(graphene.ObjectType):
     users = graphene.List(UserType)
     me = graphene.Field(UserType)
+    clocks = graphene.List(ClockType)
+    my_clocks = graphene.List(ClockType)
     
     current_clock = graphene.Field(ClockType)
     clocked_hours = graphene.Field(ClockedHoursType)
@@ -23,6 +26,15 @@ class Query(graphene.ObjectType):
         if user.is_anonymous:
             raise Exception("Not logged in")
         return user
+    
+    def resolve_clocks(self, info, **kwargs):
+        return Clock.objects.all()
+    
+    def resolve_my_clocks(self, info, **kwargs):
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception("Not logged in")
+        return Clock.objects.filter(user=user)
     
     def resolve_current_clock(self, info, **kwargs):
         pass
