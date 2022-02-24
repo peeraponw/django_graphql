@@ -10,6 +10,7 @@ class ClockType(DjangoObjectType):
     class Meta:
         model = Clock
         fields = ("id", "user", "clocked_in", "clocked_out")
+        
 class ClockedHoursType(DjangoObjectType):
     class Meta:
         model = ClockedHours
@@ -44,16 +45,9 @@ class AuthMutation(graphene.ObjectType):
     clock_in = ClockInMutation.Field()
     clock_out = ClockOutMutation.Field()
 
-class Query(UserQuery, MeQuery, graphene.ObjectType):
-    
-    
-    # current_clock = 
-    # clocked_hours = 
-    # today = 
-    # curent_week = 
-    # current_month = 
+class Query(graphene.ObjectType):
     pass
-class Mutation(AuthMutation, graphene.ObjectType):
+class Mutation(graphene.ObjectType):
     pass
     
     
