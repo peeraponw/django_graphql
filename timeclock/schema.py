@@ -23,8 +23,7 @@ class ClockIn(graphene.Mutation):
         user = info.context.user or None
         if user.is_anonymous:
             raise Exception("You must log in to start your clock")
-        c = Clock(user=user)
-        c.save()
+        c = Clock.objects.create(user=user)
         return ClockIn(user=user, clock=c)
     
 class ClockOut(graphene.Mutation):
