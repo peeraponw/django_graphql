@@ -1,6 +1,7 @@
 import graphene
 import graphql_jwt
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from users.schema import UserType
 from users.schema import CreateUser
@@ -37,7 +38,11 @@ class Query(graphene.ObjectType):
         return Clock.objects.filter(user=user)
     
     def resolve_current_clock(self, info, **kwargs):
-        pass
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception("Not logged in")
+        return Clock.objects.filter(user=user, clocked_out=None).first()
+        
     
     def resolve_clocked_hours(self, info, **kwargs):
         pass

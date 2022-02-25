@@ -8,12 +8,10 @@ from users.schema import UserType
 class ClockType(DjangoObjectType):
     class Meta:
         model = Clock
-        # fields = ("id", "user", "clocked_in", "clocked_out")
         
 class ClockedHoursType(DjangoObjectType):
     class Meta:
         model = ClockedHours
-        # fields = ("today", "current_week", "current_month")
     
 class ClockIn(graphene.Mutation):
     user = graphene.Field(UserType)
