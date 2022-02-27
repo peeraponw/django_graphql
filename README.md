@@ -16,6 +16,7 @@ This project is a part of AnyFactory Backend Engineer Interview. The goal is to 
 `python manage.py runserver`
 2) Open a web-browser (e.g. Chrome, Firefox) and browse to 
 `localhost:8000/graphql/`
+3) Please note that this repo includes an example database. It would be nice to backup the `db.sqlite3` making further progress.
 
 ## Completed work
 ### Create user
@@ -25,17 +26,17 @@ mutation {
   createUser (
     username: "{username}",
     password1: "{password}",
-    password2: "{password}",
     email: "{email}"
   ) {
-    success
-    errors
-    refreshToken
-    token
+    user{
+        id
+        username
+        email
+    }
   }
 }
 ```
-where `{username}`, `{password}`, and `{email}` are strings  your choice. You will receive token as a long string as per success of the user creation.
+where `{username}`, `{password}`, and `{email}` are strings of your choice. 
 ### Obtain Token
 To authenticate the any action by a user, a token which belongs to the correspodning user is required. This token can be obtained by the following command
 ```
@@ -44,14 +45,11 @@ mutation {
     username: {username},
   	password: {password},
   ) {
-    success
-    errors
-    refreshToken
     token
   }
 }
 ```
-where `{username}` and `{password}` are the username and password of the corresponding user. This method is complete only if the user has already been created and the `{username}` and `{password}` match the user. This command returns token of the user which is used during the authenticated query.
+where `{username}` and `{password}` are the username and password of the corresponding user. This method is complete only if the user has already been created and the given `{username}` and `{password}` match each other. This command returns token of the user which is used for authenticated query.
 
 ### Me
 To validate the authenticated GraphQL query, Postman is used in this process. A POST request can be fired to `localhost:8000/graphql/` with its **body** as a GraphQL query as follows:
@@ -64,50 +62,85 @@ query {
 ```
 and **headers** with `KEY=Authorization` and `VALUE=JWT {token}` where `{token}` is obtained from the `obtainToken` query.
 
-## TO-DOs
-Clock in and Clock out functionalities shall be applied in the upcoming stage. These two commands will update `Clock` table which contains `clock_id`, `user`, `clockin` and `clockout` columns where `clock_id` is the primary key of this table.
-### Clock In
-Upon calling this command with autorization token (as specified in `Me` command), the following command can be called:
+### Clock In / Clock Out
+With the authenticated header as `Me` query, the `ClockIn` and `ClockOut` mutations can be requested accordingly as follows:
+
 ```
 mutation{
-    clockIn
-}
-```
-This will first check if this user has any rows with data in `clockin` but no data in `clockout`, in other words, a running clock. If yes, update the `clockout` on that row with the current time or its `clockin` +8 hours, whichever is lower. This assumes that no user tries to cheat the system.
-Once the `clockin` and `clockout` match, create another row with `clockin` of current time and no data in `clockout`.
-
-### Clock Out
-Upon calling this command with autorization token (as specified in `Me` command), the following command can be called:
-```
-mutation{
-    clockOut
-}
-```
-This command checks the latest row of the corresponding user whose `clockin` exists but not `clockout` and update the `clockout` with the current time. If there is no eligible row, i.e., the user has not yet clocked in before clocking out, this will return an error message.
-
-
-### Current Clock
-Upon calling this command with autorization token (as specified in Me command), the following command can be called:
-```
-query{
-    currentClock{
-        id,
-        hours
+    clockIn{
+        user{
+            username
+        }
+        clock{
+            clockedIn
+        }
     }
 }
 ```
-This command calculate the number of hours of the running clock by compaing the latest `clockin` and the current time.
+```
+mutation{
+    clockOut{
+        user{
+            username
+        }
+        clock{
+            clockedIn
+            clockedOut
+        }
+    }
+}
+```
+The `ClockIn` allows the user to create a new record and save the their current timestamp while the `ClockOut` finds the latest record which has already been clocked in but not yet clocked out. Please note that this version does not include fail safe mechanisms, e.g., double clock in. 
 
+### Current Clock
+This query finds the `Clock` object which has been clocked in but not yet clocked out and provide its details. 
+```
+query {
+    currentClock{
+        user{
+            username
+        }
+        clockedIn
+        clockedOut
+    }
+}
+```
 
 ### Clocked Hours
-Upon calling this command with autorization token (as specified in Me command), the following command can be called:
+This query returns the amount of working hours of the authenticated user. This repo includes a example database to test this query. Please note that there is one record which has not been clocked out. The `today` hours may show differently.
+
 ```
 query{
     clockedHours{
-        today,
-        currentWeek,
+        today
+        currentWeek
         currentMonth
+    }
+```
+
+### Clocks (Bonus)
+This query returns all clocks of all users.
+```
+query{
+    clocks{
+        user{
+            username
+        }
+        clockedIn
+        clockedOut
     }
 }
 ```
-This command calculates the number of hours that the user has been clocked for today, current week, as well as current month. An aggregation function shall be used for this purpose.
+
+### myClocks (Bonus)
+This query returns all clocks of the authenticated user.
+```
+query{
+  myClocks{
+    user{
+      username
+    }
+    clockedIn
+    clockedOut
+  }
+}
